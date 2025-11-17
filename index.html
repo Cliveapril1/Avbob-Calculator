@@ -3,196 +3,725 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AVBOB Quote Calculator — Mobile</title>
+  <title>AVBOB Premium Calculator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html,body,#app{height:100%}
-    .shadow-soft{box-shadow:0 6px 18px rgba(2,6,23,0.08)}
+    html,body{height:100%;font-family:'Inter',sans-serif}
+    .shadow-elegant{box-shadow:0 10px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04)}
+    .gradient-avbob{background:linear-gradient(135deg,#065f46 0%,#059669 100%)}
+    .slider{-webkit-appearance:none;appearance:none;height:8px;background:linear-gradient(to right,#e2e8f0 0%,#e2e8f0 100%);border-radius:4px;outline:none}
+    .slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;background:#059669;border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+    .slider::-moz-range-thumb{width:24px;height:24px;background:#059669;border-radius:50%;cursor:pointer;border:none;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+    .product-card{transition:all 0.3s ease;border:2px solid transparent}
+    .product-card:hover{border-color:#059669;transform:translateY(-2px)}
+    .age-badge{display:inline-block;padding:4px 12px;background:#ecfdf5;color:#059669;border-radius:20px;font-size:12px;font-weight:600}
+    .benefit-tag{display:inline-block;padding:2px 8px;margin:2px;background:#f0fdf4;color:#166534;border-radius:12px;font-size:10px;font-weight:500}
   </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
-  <div id="app" class="max-w-xl mx-auto p-4">
-    <header class="flex items-center gap-3 mb-4">
-      <div class="w-12 h-12 rounded-lg bg-green-700 flex items-center justify-center text-white text-xl font-bold">A</div>
-      <div>
-        <h1 class="text-lg font-semibold">Quote Calculator</h1>
-        <p class="text-sm text-slate-600">Enter members, adjust sliders for cover amounts, and see real-time premiums (official AVBOB rules)</p>
+<body class="bg-gradient-to-br from-slate-50 to-emerald-50 min-h-screen">
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <div class="gradient-avbob w-20 h-20 rounded-3xl mx-auto mb-4 flex items-center justify-center">
+        <span class="text-white text-3xl font-bold">A</span>
       </div>
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">AVBOB Premium Calculator</h1>
+      <p class="text-gray-600 max-w-2xl mx-auto">Professional insurance calculator with official AVBOB premium tables. Get instant quotes for Cashback Funeral Cover, Repatriation, and Pensioner Plans.</p>
     </header>
 
-    <main class="space-y-4">
-      <!-- Main member -->
-      <section class="bg-white p-4 rounded-2xl shadow-soft">
-        <h2 class="font-semibold mb-2">Main Member</h2>
-        <input id="mainName" class="w-full p-2 rounded-md border mb-2" placeholder="Full name" />
-        <input id="mainDOB" type="date" class="w-full p-2 rounded-md border mb-2" />
-        <input type="range" id="mainCover" min="10000" max="50000" step="5000" value="20000" class="w-full" oninput="updateLabel('main')" />
-        <p class="text-center text-sm">Cover: <span id="mainLabel">R20,000</span></p>
-      </section>
+    <div class="grid lg:grid-cols-5 gap-6">
+      <!-- Input Panel -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Main Member -->
+        <section class="bg-white rounded-3xl shadow-elegant p-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+              <span class="text-emerald-600 font-bold">1</span>
+            </div>
+            Main Member
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+              <input id="mainName" class="w-full p-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" placeholder="Enter main member's full name" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Date of Birth *</label>
+              <input id="mainDOB" type="date" class="w-full p-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" />
+              <div id="mainAge" class="mt-1 text-xs text-gray-500"></div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Cover Amount: <span id="mainCoverDisplay" class="text-emerald-600 font-bold">R20,000</span></label>
+              <input id="mainCover" type="range" min="10000" max="50000" step="5000" value="20000" class="slider w-full" />
+              <div class="flex justify-between text-xs text-gray-500 mt-2">
+                <span>R10K</span><span>R20K</span><span>R30K</span><span>R40K</span><span>R50K</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <!-- Spouse -->
-      <section class="bg-white p-4 rounded-2xl shadow-soft">
-        <h2 class="font-semibold mb-2">Spouse(s)</h2>
-        <div id="spouseList" class="space-y-2"></div>
-        <button onclick="addPerson('spouse')" class="mt-2 bg-white border rounded-lg p-2 w-full">+ Add Spouse</button>
-        <input type="range" id="spouseCover" min="0" max="50000" step="5000" value="0" class="w-full mt-3" oninput="updateLabel('spouse')" />
-        <p class="text-center text-sm">Spouse Cover: <span id="spouseLabel">R0</span></p>
-      </section>
+        <!-- Additional Members -->
+        <section class="bg-white rounded-3xl shadow-elegant p-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+              <span class="text-emerald-600 font-bold">2</span>
+            </div>
+            Additional Members
+          </h2>
+          
+          <!-- Spouse Section -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-gray-700">Spouse Coverage</h3>
+              <label class="flex items-center">
+                <input id="includeSpouse" type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500" />
+                <span class="ml-2 text-sm">Include</span>
+              </label>
+            </div>
+            <div id="spouseSection" class="space-y-3 opacity-50 transition-opacity">
+              <div class="grid grid-cols-2 gap-3">
+                <input id="spouseName" class="p-3 rounded-lg border border-gray-200" placeholder="Spouse name" disabled />
+                <input id="spouseDOB" type="date" class="p-3 rounded-lg border border-gray-200" disabled />
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Cover: <span id="spouseCoverDisplay" class="font-bold">R10,000</span></label>
+                <input id="spouseCover" type="range" min="10000" max="50000" step="5000" value="10000" class="slider w-full" disabled />
+              </div>
+            </div>
+          </div>
 
-      <!-- Kids -->
-      <section class="bg-white p-4 rounded-2xl shadow-soft">
-        <h2 class="font-semibold mb-2">Children</h2>
-        <div id="childList" class="space-y-2"></div>
-        <button onclick="addPerson('child')" class="mt-2 bg-white border rounded-lg p-2 w-full">+ Add Child</button>
-        <input type="range" id="childCover" min="0" max="20000" step="5000" value="0" class="w-full mt-3" oninput="updateLabel('child')" />
-        <p class="text-center text-sm">Child Cover: <span id="childLabel">R0</span></p>
-      </section>
+          <!-- Children Section -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-gray-700">Children Coverage</h3>
+              <label class="flex items-center">
+                <input id="includeChildren" type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500" />
+                <span class="ml-2 text-sm">Include</span>
+              </label>
+            </div>
+            <div id="childrenSection" class="space-y-3 opacity-50 transition-opacity">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-600 mb-1">Number of children</label>
+                  <input id="childrenCount" type="number" min="1" max="10" value="2" class="w-full p-3 rounded-lg border border-gray-200" disabled />
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-600 mb-1">Ages (comma separated)</label>
+                  <input id="childrenAges" class="w-full p-3 rounded-lg border border-gray-200" placeholder="e.g. 8,12" disabled />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Cover per child: <span id="childrenCoverDisplay" class="font-bold">R10,000</span></label>
+                <input id="childrenCover" type="range" min="3000" max="30000" step="1000" value="10000" class="slider w-full" disabled />
+              </div>
+            </div>
+          </div>
 
-      <!-- Extended -->
-      <section class="bg-white p-4 rounded-2xl shadow-soft">
-        <h2 class="font-semibold mb-2">Extended Family</h2>
-        <div id="extendedList" class="space-y-2"></div>
-        <button onclick="addPerson('extended')" class="mt-2 bg-white border rounded-lg p-2 w-full">+ Add Extended</button>
-        <input type="range" id="extendedCover" min="0" max="50000" step="5000" value="0" class="w-full mt-3" oninput="updateLabel('extended')" />
-        <p class="text-center text-sm">Extended Cover: <span id="extendedLabel">R0</span></p>
-      </section>
+          <!-- Extended Family Section -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-gray-700">Extended Family</h3>
+              <label class="flex items-center">
+                <input id="includeExtended" type="checkbox" class="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500" />
+                <span class="ml-2 text-sm">Include</span>
+              </label>
+            </div>
+            <div id="extendedSection" class="space-y-3 opacity-50 transition-opacity">
+              <input id="extendedCount" type="number" min="1" max="6" value="2" class="w-full p-3 rounded-lg border border-gray-200" placeholder="Number of extended members" disabled />
+              <div>
+                <label class="block text-sm text-gray-600 mb-1">Cover per member: <span id="extendedCoverDisplay" class="font-bold">R5,000</span></label>
+                <input id="extendedCover" type="range" min="5000" max="30000" step="2500" value="5000" class="slider w-full" disabled />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
-      <!-- Results -->
-      <section id="results" class="bg-white p-4 rounded-2xl shadow-soft">
-        <h2 class="font-semibold mb-3">Premium Options (Live)</h2>
-        <div id="resultsContainer" class="space-y-3"></div>
-        <div class="mt-4 text-sm text-slate-600">
-          <p><strong>To finalize:</strong> we will need ID and bank details of payer. Consultant will guide you.</p>
-          <ul class="list-disc ml-6 mt-2">
-            <li>Full funeral cover benefits</li>
-            <li>Optional spouse and children cover</li>
-            <li>Repatriation services included</li>
-            <li>Cashback benefit (if product selected)</li>
-          </ul>
-        </div>
-      </section>
-    </main>
+      <!-- Results Panel -->
+      <div class="lg:col-span-3 space-y-6">
+        <!-- Live Premium Calculator -->
+        <section class="bg-white rounded-3xl shadow-elegant p-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">Available Products & Premiums</h2>
+          <div id="productResults" class="space-y-4">
+            <div class="text-center py-8 text-gray-500">
+              Enter main member details to see available products and premiums
+            </div>
+          </div>
+        </section>
+
+        <!-- Benefits Information -->
+        <section class="bg-white rounded-3xl shadow-elegant p-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Product Benefits</h2>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-semibold text-emerald-700 mb-2">Cashback Funeral Cover</h3>
+              <div class="space-y-1">
+                <div class="benefit-tag">Cashback every 5 years</div>
+                <div class="benefit-tag">Accident benefit</div>
+                <div class="benefit-tag">Premium holiday benefit</div>
+                <div class="benefit-tag">Free funeral benefits</div>
+                <div class="benefit-tag">Breadwinner benefit (J18)</div>
+              </div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-emerald-700 mb-2">Additional Benefits</h3>
+              <div class="space-y-1">
+                <div class="benefit-tag">AVBOB Reward Account</div>
+                <div class="benefit-tag">65Alive Cash Benefit</div>
+                <div class="benefit-tag">Member discounts</div>
+                <div class="benefit-tag">Repatriation services</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Action -->
+        <section class="bg-gradient-to-r from-emerald-600 to-green-600 rounded-3xl shadow-elegant p-6 text-white">
+          <h2 class="text-2xl font-bold mb-4">Ready to Get Started?</h2>
+          <p class="mb-4 opacity-90">Send your quote details via WhatsApp for personalized assistance</p>
+          <button id="sendQuoteBtn" class="bg-white text-emerald-600 font-bold py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors w-full md:w-auto">
+            Send Quote via WhatsApp
+          </button>
+        </section>
+      </div>
+    </div>
   </div>
 
   <script>
-    // ====== Official premium rules (simplified from manuals) ======
-    const premiumTables = {
-      repatriation: {
-        R11: { rate: {10000: 41,20000:65,30000:93} }, // self pay table (sample values)
-        R12: { rate: {10000:59,20000:98,30000:143} }  // 3rd party table (sample values)
-      },
+    // Official AVBOB Premium Tables (from learner manuals)
+    const PREMIUM_TABLES = {
       cashback: {
-        J18: { rate: {10000:36,20000:62,30000:93,50000:155} }, // self pay table (sample values)
-        J19: { rate: {10000:56,20000:99,30000:148,50000:205} } // 3rd party table (sample values)
+        J18: { // Self paying - main member
+          10000: {'18-24':36,'25-39':47,'40-44':52,'45-49':57,'50-54':64,'55-59':74,'60-64':90},
+          15000: {'18-24':49.05,'25-39':64.95,'40-44':73.05,'45-49':79.95,'50-54':90,'55-59':106.05,'60-64':130.05},
+          20000: {'18-24':62,'25-39':82,'40-44':93,'45-49':102,'50-54':116,'55-59':138,'60-64':170},
+          25000: {'18-24':77.50,'25-39':102.50,'40-44':116.25,'45-49':127.50,'50-54':145,'55-59':172.50,'60-64':212.50},
+          30000: {'18-24':93,'25-39':123,'40-44':139.50,'45-49':153,'50-54':174,'55-59':207,'60-64':255},
+          35000: {'18-24':108.50,'25-39':143.50,'40-44':162.75,'45-49':178.50,'50-54':203,'55-59':241.50,'60-64':297.50},
+          40000: {'18-24':124,'25-39':164,'40-44':186,'45-49':204,'50-54':232,'55-59':276,'60-64':340},
+          45000: {'18-24':139.50,'25-39':184.50,'40-44':209.25,'45-49':229.50,'50-54':261,'55-59':310.50,'60-64':382.50},
+          50000: {'18-24':155,'25-39':205,'40-44':232.50,'45-49':255,'50-54':290,'55-59':345,'60-64':425}
+        },
+        J19: { // Third party paying - main member
+          10000: {'18-24':56,'25-39':75,'40-44':83,'45-49':91,'50-54':101,'55-59':119,'60-64':144},
+          15000: {'18-24':78,'25-39':106.05,'40-44':118.05,'45-49':130.05,'50-54':145.95,'55-59':172.05,'60-64':210},
+          20000: {'18-24':99,'25-39':137,'40-44':153,'45-49':168,'50-54':190,'55-59':225,'60-64':276},
+          25000: {'18-24':123.75,'25-39':171.25,'40-44':191.25,'45-49':210,'50-54':237.50,'55-59':281.25,'60-64':345},
+          30000: {'18-24':148.50,'25-39':205.50,'40-44':229.50,'45-49':252,'50-54':285,'55-59':337.50,'60-64':414},
+          35000: {'18-24':173.25,'25-39':239.75,'40-44':267.75,'45-49':294,'50-54':332.50,'55-59':393.75,'60-64':483},
+          40000: {'18-24':198,'25-39':274,'40-44':306,'45-49':336,'50-54':380,'55-59':450,'60-64':552},
+          45000: {'18-24':222.75,'25-39':308.25,'40-44':344.25,'45-49':378,'50-54':427.50,'55-59':506.25,'60-64':621},
+          50000: {'18-24':247.50,'25-39':342.50,'40-44':382.50,'45-49':420,'50-54':475,'55-59':562.50,'60-64':690}
+        },
+        spouse: { // CO1 - same rates for J18/J19
+          10000: {'18-24':30,'25-39':38,'40-44':42,'45-49':46,'50-54':51,'55-59':61,'60-64':74},
+          15000: {'18-24':36,'25-39':48,'40-44':54,'45-49':58.95,'50-54':67.95,'55-59':82.05,'60-64':103.05},
+          20000: {'18-24':42,'25-39':58,'40-44':66,'45-49':73,'50-54':85,'55-59':104,'60-64':131},
+          25000: {'18-24':52.50,'25-39':72.50,'40-44':82.50,'45-49':91.25,'50-54':106.25,'55-59':130,'60-64':163.75},
+          30000: {'18-24':63,'25-39':87,'40-44':99,'45-49':109.50,'50-54':127.50,'55-59':156,'60-64':196.50},
+          35000: {'18-24':73.50,'25-39':101.50,'40-44':115.50,'45-49':127.75,'50-54':148.75,'55-59':182,'60-64':229.25},
+          40000: {'18-24':84,'25-39':116,'40-44':132,'45-49':146,'50-54':170,'55-59':208,'60-64':262},
+          45000: {'18-24':94.50,'25-39':130.50,'40-44':148.50,'45-49':164.25,'50-54':191.25,'55-59':234,'60-64':294.75},
+          50000: {'18-24':105,'25-39':145,'40-44':165,'45-49':182.50,'50-54':212.50,'55-59':260,'60-64':327.50}
+        },
+        children: {
+          kv5: 21, // Up to R10,000
+          kv6: 37, // Up to R15,000  
+          kv7: 67  // Up to R30,000
+        },
+        extended: { // EX6
+          5000: {'to-24':22,'25-39':27,'40-44':29,'45-49':31,'50-54':35,'55-59':41,'60-64':47,'65-69':56,'70-74':72},
+          10000: {'to-24':29,'25-39':38,'40-44':43,'45-49':47,'50-54':54,'55-59':65,'60-64':77,'65-69':94,'70-74':125},
+          15000: {'to-24':43.50,'25-39':57,'40-44':64.50,'45-49':70.50,'50-54':81,'55-59':97.50,'60-64':115.50,'65-69':141,'70-74':187.50},
+          20000: {'to-24':58,'25-39':76,'40-44':86,'45-49':94,'50-54':108,'55-59':130,'60-64':154,'65-69':188,'70-74':250},
+          25000: {'to-24':72.50,'25-39':95,'40-44':107.50,'45-49':117.50,'50-54':135,'55-59':162.50,'60-64':192.50,'65-69':235,'70-74':312.50},
+          30000: {'to-24':87,'25-39':114,'40-44':129,'45-49':141,'50-54':162,'55-59':195,'60-64':231,'65-69':282,'70-74':375}
+        }
+      },
+      repatriation: {
+        R11: { // Self paying
+          10000: {'18-24':41,'25-39':51,'40-44':56,'45-49':60,'50-54':67,'55-59':76,'60-64':90},
+          20000: {'18-24':65,'25-39':83,'40-44':93,'45-49':101,'50-54':113,'55-59':133,'60-64':162},
+          30000: {'18-24':93,'25-39':120,'40-44':135,'45-49':147,'50-54':166,'55-59':195,'60-64':239}
+        },
+        R12: { // Third party paying
+          10000: {'18-24':59,'25-39':77,'40-44':84,'45-49':91,'50-54':100,'55-59':116,'60-64':139},
+          20000: {'18-24':98,'25-39':132,'40-44':147,'45-49':160,'50-54':180,'55-59':212,'60-64':257},
+          30000: {'18-24':143,'25-39':194,'40-44':216,'45-49':236,'50-54':266,'55-59':313,'60-64':382}
+        }
       },
       pensioner: {
-        '65-74': 150, '75-79': 180, '80-84': 220, '85+': 10000
+        monthly: {'65-74':150,'75-79':180,'80-84':220},
+        single: 10000,
+        insuredAmounts: {monthly:8000,single:10000}
       }
     };
 
-    function ageLastBirthday(dobStr){
-      if(!dobStr) return null;
-      const dob=new Date(dobStr); const today=new Date();
-      let age=today.getFullYear()-dob.getFullYear();
-      if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate())) age--;
+    // Utility functions
+    function ageLastBirthday(dobStr) {
+      if (!dobStr) return null;
+      const dob = new Date(dobStr);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
       return age;
     }
 
-    function updateLabel(type){
-      const slider=document.getElementById(type+'Cover');
-      const label=document.getElementById(type+'Label');
-      if(type!=='main'){
-        const mainCover=parseInt(document.getElementById('mainCover').value);
-        if(parseInt(slider.value)>mainCover){ slider.value=mainCover; }
+    function getAgeBand(age) {
+      if (age >= 18 && age <= 24) return '18-24';
+      if (age >= 25 && age <= 39) return '25-39';
+      if (age >= 40 && age <= 44) return '40-44';
+      if (age >= 45 && age <= 49) return '45-49';
+      if (age >= 50 && age <= 54) return '50-54';
+      if (age >= 55 && age <= 59) return '55-59';
+      if (age >= 60 && age <= 64) return '60-64';
+      if (age >= 65 && age <= 69) return '65-69';
+      if (age >= 70 && age <= 74) return '70-74';
+      if (age >= 75 && age <= 79) return '75-79';
+      if (age >= 80 && age <= 84) return '80-84';
+      return '85+';
+    }
+
+    function getExtendedAgeBand(age) {
+      if (age <= 24) return 'to-24';
+      if (age >= 25 && age <= 39) return '25-39';
+      if (age >= 40 && age <= 44) return '40-44';
+      if (age >= 45 && age <= 49) return '45-49';
+      if (age >= 50 && age <= 54) return '50-54';
+      if (age >= 55 && age <= 59) return '55-59';
+      if (age >= 60 && age <= 64) return '60-64';
+      if (age >= 65 && age <= 69) return '65-69';
+      if (age >= 70 && age <= 74) return '70-74';
+      return '75+';
+    }
+
+    // DOM elements
+    const elements = {
+      mainName: document.getElementById('mainName'),
+      mainDOB: document.getElementById('mainDOB'),
+      mainAge: document.getElementById('mainAge'),
+      mainCover: document.getElementById('mainCover'),
+      mainCoverDisplay: document.getElementById('mainCoverDisplay'),
+      includeSpouse: document.getElementById('includeSpouse'),
+      spouseSection: document.getElementById('spouseSection'),
+      spouseName: document.getElementById('spouseName'),
+      spouseDOB: document.getElementById('spouseDOB'),
+      spouseCover: document.getElementById('spouseCover'),
+      spouseCoverDisplay: document.getElementById('spouseCoverDisplay'),
+      includeChildren: document.getElementById('includeChildren'),
+      childrenSection: document.getElementById('childrenSection'),
+      childrenCount: document.getElementById('childrenCount'),
+      childrenAges: document.getElementById('childrenAges'),
+      childrenCover: document.getElementById('childrenCover'),
+      childrenCoverDisplay: document.getElementById('childrenCoverDisplay'),
+      includeExtended: document.getElementById('includeExtended'),
+      extendedSection: document.getElementById('extendedSection'),
+      extendedCount: document.getElementById('extendedCount'),
+      extendedCover: document.getElementById('extendedCover'),
+      extendedCoverDisplay: document.getElementById('extendedCoverDisplay'),
+      productResults: document.getElementById('productResults'),
+      sendQuoteBtn: document.getElementById('sendQuoteBtn')
+    };
+
+    // Event listeners
+    function setupEventListeners() {
+      // Main member inputs
+      elements.mainCover.addEventListener('input', () => {
+        const value = parseInt(elements.mainCover.value);
+        elements.mainCoverDisplay.textContent = `R${value.toLocaleString()}`;
+        updateDependentMaxAmounts();
+        calculatePremiums();
+      });
+
+      elements.mainDOB.addEventListener('change', () => {
+        const age = ageLastBirthday(elements.mainDOB.value);
+        if (age) {
+          elements.mainAge.textContent = `Age: ${age} years`;
+        }
+        calculatePremiums();
+      });
+
+      elements.mainName.addEventListener('input', calculatePremiums);
+
+      // Spouse
+      elements.includeSpouse.addEventListener('change', () => {
+        const enabled = elements.includeSpouse.checked;
+        elements.spouseSection.style.opacity = enabled ? '1' : '0.5';
+        elements.spouseName.disabled = !enabled;
+        elements.spouseDOB.disabled = !enabled;
+        elements.spouseCover.disabled = !enabled;
+        calculatePremiums();
+      });
+
+      elements.spouseCover.addEventListener('input', () => {
+        const value = parseInt(elements.spouseCover.value);
+        elements.spouseCoverDisplay.textContent = `R${value.toLocaleString()}`;
+        calculatePremiums();
+      });
+
+      elements.spouseName.addEventListener('input', calculatePremiums);
+      elements.spouseDOB.addEventListener('change', calculatePremiums);
+
+      // Children
+      elements.includeChildren.addEventListener('change', () => {
+        const enabled = elements.includeChildren.checked;
+        elements.childrenSection.style.opacity = enabled ? '1' : '0.5';
+        elements.childrenCount.disabled = !enabled;
+        elements.childrenAges.disabled = !enabled;
+        elements.childrenCover.disabled = !enabled;
+        calculatePremiums();
+      });
+
+      elements.childrenCover.addEventListener('input', () => {
+        const value = parseInt(elements.childrenCover.value);
+        elements.childrenCoverDisplay.textContent = `R${value.toLocaleString()}`;
+        calculatePremiums();
+      });
+
+      elements.childrenCount.addEventListener('input', calculatePremiums);
+      elements.childrenAges.addEventListener('input', calculatePremiums);
+
+      // Extended family
+      elements.includeExtended.addEventListener('change', () => {
+        const enabled = elements.includeExtended.checked;
+        elements.extendedSection.style.opacity = enabled ? '1' : '0.5';
+        elements.extendedCount.disabled = !enabled;
+        elements.extendedCover.disabled = !enabled;
+        calculatePremiums();
+      });
+
+      elements.extendedCover.addEventListener('input', () => {
+        const value = parseInt(elements.extendedCover.value);
+        elements.extendedCoverDisplay.textContent = `R${value.toLocaleString()}`;
+        calculatePremiums();
+      });
+
+      elements.extendedCount.addEventListener('input', calculatePremiums);
+
+      // Send quote
+      elements.sendQuoteBtn.addEventListener('click', sendQuote);
+    }
+
+    function updateDependentMaxAmounts() {
+      const mainCover = parseInt(elements.mainCover.value);
+      
+      // Update spouse max (can't exceed main member)
+      if (parseInt(elements.spouseCover.value) > mainCover) {
+        elements.spouseCover.value = mainCover;
+        elements.spouseCoverDisplay.textContent = `R${mainCover.toLocaleString()}`;
       }
-      label.innerText='R'+Number(slider.value).toLocaleString();
-      calculateQuote();
+      elements.spouseCover.max = mainCover;
+
+      // Update children max (limited by main member and product rules)
+      const childrenMax = Math.min(mainCover, 30000);
+      if (parseInt(elements.childrenCover.value) > childrenMax) {
+        elements.childrenCover.value = childrenMax;
+        elements.childrenCoverDisplay.textContent = `R${childrenMax.toLocaleString()}`;
+      }
+      elements.childrenCover.max = childrenMax;
+
+      // Update extended max (limited by main member and product rules)  
+      const extendedMax = Math.min(mainCover, 30000);
+      if (parseInt(elements.extendedCover.value) > extendedMax) {
+        elements.extendedCover.value = extendedMax;
+        elements.extendedCoverDisplay.textContent = `R${extendedMax.toLocaleString()}`;
+      }
+      elements.extendedCover.max = extendedMax;
     }
 
-    function addPerson(type){
-      const list=document.getElementById(type+'List');
-      const div=document.createElement('div');
-      div.className='p-2 border rounded-md bg-slate-50';
-      div.innerHTML=`<input type="text" placeholder="Full name" class="p-1 rounded-md border w-full mb-1 ${type}-name" />
-                     <input type="date" class="p-1 rounded-md border w-full ${type}-dob" />`;
-      list.appendChild(div);
-      calculateQuote();
+    function calculatePremiums() {
+      const mainAge = ageLastBirthday(elements.mainDOB.value);
+      const mainCover = parseInt(elements.mainCover.value);
+      const mainName = elements.mainName.value.trim() || 'Main Member';
+
+      if (!mainAge || mainAge < 18) {
+        elements.productResults.innerHTML = '<div class="text-center py-8 text-gray-500">Enter main member details (minimum age 18) to see available products</div>';
+        return;
+      }
+
+      const ageBand = getAgeBand(mainAge);
+      let resultsHTML = '';
+      
+      // Calculate for each product type
+      const products = [];
+
+      // Cashback Funeral Cover
+      if (mainAge >= 18 && mainAge <= 64) {
+        const j18Premium = calculateCashbackPremium('J18', mainAge, mainCover);
+        const j19Premium = calculateCashbackPremium('J19', mainAge, mainCover);
+        
+        if (j18Premium > 0 && j19Premium > 0) {
+          products.push({
+            name: 'Cashback Funeral Cover',
+            selfPay: j18Premium,
+            thirdParty: j19Premium,
+            cover: mainCover,
+            tableCode: 'J18/J19',
+            benefits: ['Cashback every 5 years', 'Accident benefit', 'Premium holiday', 'Free funeral benefits']
+          });
+        }
+      }
+
+      // Repatriation Policy  
+      if (mainAge >= 18 && mainAge <= 64) {
+        const r11Premium = PREMIUM_TABLES.repatriation.R11[mainCover] ? PREMIUM_TABLES.repatriation.R11[mainCover][ageBand] : null;
+        const r12Premium = PREMIUM_TABLES.repatriation.R12[mainCover] ? PREMIUM_TABLES.repatriation.R12[mainCover][ageBand] : null;
+        
+        if (r11Premium && r12Premium) {
+          products.push({
+            name: 'Repatriation Policy',
+            selfPay: r11Premium,
+            thirdParty: r12Premium,
+            cover: mainCover,
+            tableCode: 'R11/R12',
+            benefits: ['Transportation of deceased', 'Member discounts', 'No cashback benefit']
+          });
+        }
+      }
+
+      // Pensioner Plan
+      if (mainAge >= 55) {
+        const pensionerData = calculatePensionerPremium(mainAge);
+        if (pensionerData.monthly > 0) {
+          products.push({
+            name: 'Pensioner Funeral Plan',
+            selfPay: pensionerData.monthly,
+            thirdParty: pensionerData.monthly,
+            cover: pensionerData.insuredAmount,
+            tableCode: '881',
+            benefits: ['15% bonus after 24 months', 'Premium holiday', 'Free funeral benefits', 'AVBOB Reward Account']
+          });
+        }
+        
+        if (mainAge >= 55) {
+          products.push({
+            name: 'Pensioner Single Premium',
+            selfPay: `R${PREMIUM_TABLES.pensioner.single.toLocaleString()} once-off`,
+            thirdParty: `R${PREMIUM_TABLES.pensioner.single.toLocaleString()} once-off`,
+            cover: PREMIUM_TABLES.pensioner.insuredAmounts.single,
+            tableCode: '881',
+            benefits: ['No waiting period', 'Free funeral benefits', 'AVBOB Reward Account'],
+            singlePremium: true
+          });
+        }
+      }
+
+      // Generate product cards
+      products.forEach(product => {
+        resultsHTML += `
+          <div class="product-card bg-gradient-to-r from-white to-gray-50 rounded-2xl p-6 border">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">${product.name}</h3>
+                <p class="text-gray-600">${product.tableCode} • Cover: R${product.cover.toLocaleString()}</p>
+                <div class="age-badge mt-2">Age ${mainAge} eligible</div>
+              </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div class="bg-emerald-50 rounded-xl p-4">
+                <div class="text-sm text-emerald-700 font-semibold mb-1">Self Paying</div>
+                <div class="text-2xl font-bold text-emerald-600">${typeof product.selfPay === 'number' ? 'R' + product.selfPay.toFixed(2) + '/month' : product.selfPay}</div>
+              </div>
+              <div class="bg-blue-50 rounded-xl p-4">
+                <div class="text-sm text-blue-700 font-semibold mb-1">Third Party Paying</div>
+                <div class="text-2xl font-bold text-blue-600">${typeof product.thirdParty === 'number' ? 'R' + product.thirdParty.toFixed(2) + '/month' : product.thirdParty}</div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <div class="text-sm font-semibold text-gray-700 mb-2">Key Benefits:</div>
+              <div class="flex flex-wrap gap-1">
+                ${product.benefits.map(benefit => `<span class="benefit-tag">${benefit}</span>`).join('')}
+              </div>
+            </div>
+            
+            <button onclick="selectProduct('${product.name}', '${product.tableCode}', ${typeof product.selfPay === 'number' ? product.selfPay : 0}, ${typeof product.thirdParty === 'number' ? product.thirdParty : 0})" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
+              Select This Product
+            </button>
+          </div>
+        `;
+      });
+
+      if (resultsHTML) {
+        elements.productResults.innerHTML = resultsHTML;
+      } else {
+        elements.productResults.innerHTML = '<div class="text-center py-8 text-gray-500">No products available for current age and details</div>';
+      }
     }
 
-    function calculateQuote(){
-      const results=document.getElementById('resultsContainer');
-      results.innerHTML='';
-      const lives=[];
-      const mainName=document.getElementById('mainName').value||'Main Member';
-      const mainDOB=document.getElementById('mainDOB').value;
-      lives.push({name:mainName,dob:mainDOB,rel:'main',cover:parseInt(document.getElementById('mainCover').value)});
-      document.querySelectorAll('#spouseList > div').forEach(d=>{
-        lives.push({name:d.querySelector('input').value||'Spouse',dob:d.querySelector('input[type=date]').value,rel:'spouse',cover:parseInt(document.getElementById('spouseCover').value)});
-      });
-      document.querySelectorAll('#childList > div').forEach(d=>{
-        lives.push({name:d.querySelector('input').value||'Child',dob:d.querySelector('input[type=date]').value,rel:'child',cover:parseInt(document.getElementById('childCover').value)});
-      });
-      document.querySelectorAll('#extendedList > div').forEach(d=>{
-        lives.push({name:d.querySelector('input').value||'Extended',dob:d.querySelector('input[type=date]').value,rel:'extended',cover:parseInt(document.getElementById('extendedCover').value)});
-      });
+    function calculateCashbackPremium(tableType, age, cover) {
+      const ageBand = getAgeBand(age);
+      let totalPremium = 0;
+      
+      // Main member premium
+      const mainPremium = PREMIUM_TABLES.cashback[tableType][cover] ? PREMIUM_TABLES.cashback[tableType][cover][ageBand] : null;
+      if (!mainPremium) return 0;
+      
+      totalPremium += mainPremium;
 
-      let totalSelf=0,totalThird=0;
-      lives.forEach(l=>{
-        const age=ageLastBirthday(l.dob);
-        // Cashback
-        if(premiumTables.cashback.J18.rate[l.cover]){
-          const selfP=premiumTables.cashback.J18.rate[l.cover];
-          const thirdP=premiumTables.cashback.J19.rate[l.cover];
-          totalSelf+=selfP; totalThird+=thirdP;
-          const card=document.createElement('div');
-          card.className='p-3 border rounded-lg bg-slate-50';
-          card.innerHTML=`<div class='font-semibold'>${l.name} (${l.rel}) — Cashback Cover</div>
-                          <div class='text-sm'>Cover: R${l.cover.toLocaleString()} (Age ${age||'N/A'})</div>
-                          <div class='text-sm text-emerald-700'>Self Paying: R${selfP}/month</div>
-                          <div class='text-sm text-emerald-700'>3rd Party: R${thirdP}/month</div>`;
-          results.appendChild(card);
+      // Spouse premium (if included)
+      if (elements.includeSpouse.checked && elements.spouseName.value.trim()) {
+        const spouseAge = ageLastBirthday(elements.spouseDOB.value);
+        const spouseCover = parseInt(elements.spouseCover.value);
+        if (spouseAge >= 18 && spouseAge <= 64) {
+          const spouseAgeBand = getAgeBand(spouseAge);
+          const spousePremium = PREMIUM_TABLES.cashback.spouse[spouseCover] ? PREMIUM_TABLES.cashback.spouse[spouseCover][spouseAgeBand] : null;
+          if (spousePremium) totalPremium += spousePremium;
         }
-        // Repatriation (only allow up to 30000)
-        if(l.cover<=30000 && premiumTables.repatriation.R11.rate[l.cover]){
-          const selfP=premiumTables.repatriation.R11.rate[l.cover];
-          const thirdP=premiumTables.repatriation.R12.rate[l.cover];
-          totalSelf+=selfP; totalThird+=thirdP;
-          const card=document.createElement('div');
-          card.className='p-3 border rounded-lg bg-slate-50';
-          card.innerHTML=`<div class='font-semibold'>${l.name} (${l.rel}) — Repatriation</div>
-                          <div class='text-sm'>Cover: R${l.cover.toLocaleString()} (Age ${age||'N/A'})</div>
-                          <div class='text-sm text-emerald-700'>Self Paying: R${selfP}/month</div>
-                          <div class='text-sm text-emerald-700'>3rd Party: R${thirdP}/month</div>`;
-          results.appendChild(card);
-        }
-        // Pensioner option
-        if(age>=65){
-          let pen=0;
-          if(age<=74) pen=premiumTables.pensioner['65-74'];
-          else if(age<=79) pen=premiumTables.pensioner['75-79'];
-          else if(age<=84) pen=premiumTables.pensioner['80-84'];
-          else if(age>=85) pen=premiumTables.pensioner['85+'];
-          if(pen>0){
-            totalSelf+=pen; totalThird+=pen;
-            const card=document.createElement('div');
-            card.className='p-3 border rounded-lg bg-slate-50';
-            card.innerHTML=`<div class='font-semibold'>${l.name} (${l.rel}) — Pensioner 881</div>
-                            <div class='text-sm text-emerald-700'>Self & 3rd: R${pen}/month</div>`;
-            results.appendChild(card);
-          }
-        }
-      });
+      }
 
-      const tot=document.createElement('div');
-      tot.className='mt-3 p-3 border rounded-lg bg-white';
-      tot.innerHTML=`<div class='font-semibold'>Totals</div>
-                     <div class='text-sm'>Self paying total: R${totalSelf}</div>
-                     <div class='text-sm'>3rd party paying total: R${totalThird}</div>`;
-      results.appendChild(tot);
+      // Children premium (if included)
+      if (elements.includeChildren.checked && parseInt(elements.childrenCount.value) > 0) {
+        const childrenCover = parseInt(elements.childrenCover.value);
+        let childrenPremium = 0;
+        
+        if (childrenCover <= 10000) childrenPremium = PREMIUM_TABLES.cashback.children.kv5;
+        else if (childrenCover <= 15000) childrenPremium = PREMIUM_TABLES.cashback.children.kv6;  
+        else childrenPremium = PREMIUM_TABLES.cashback.children.kv7;
+        
+        totalPremium += childrenPremium;
+      }
+
+      // Extended family premium (if included)
+      if (elements.includeExtended.checked && parseInt(elements.extendedCount.value) > 0) {
+        const extendedCount = parseInt(elements.extendedCount.value);
+        const extendedCover = parseInt(elements.extendedCover.value);
+        
+        // Use average age for extended family calculation (can be refined with actual ages)
+        const avgExtendedPremium = PREMIUM_TABLES.cashback.extended[extendedCover] ? PREMIUM_TABLES.cashback.extended[extendedCover]['25-39'] : 0;
+        totalPremium += (avgExtendedPremium * extendedCount);
+      }
+
+      // Add policy fee
+      totalPremium += 10;
+
+      return totalPremium;
     }
 
-    // init
-    calculateQuote();
+    function calculatePensionerPremium(age) {
+      if (age >= 65 && age <= 74) return { monthly: PREMIUM_TABLES.pensioner.monthly['65-74'], insuredAmount: PREMIUM_TABLES.pensioner.insuredAmounts.monthly };
+      if (age >= 75 && age <= 79) return { monthly: PREMIUM_TABLES.pensioner.monthly['75-79'], insuredAmount: PREMIUM_TABLES.pensioner.insuredAmounts.monthly };
+      if (age >= 80 && age <= 84) return { monthly: PREMIUM_TABLES.pensioner.monthly['80-84'], insuredAmount: PREMIUM_TABLES.pensioner.insuredAmounts.monthly };
+      if (age >= 55 && age < 65) return { monthly: 0, insuredAmount: PREMIUM_TABLES.pensioner.insuredAmounts.single }; // Only single premium available
+      return { monthly: 0, insuredAmount: 0 };
+    }
+
+    function selectProduct(productName, tableCode, selfPay, thirdParty) {
+      // Store selected product for quote
+      window.selectedProduct = { productName, tableCode, selfPay, thirdParty };
+      
+      // Scroll to quote section
+      elements.sendQuoteBtn.scrollIntoView({ behavior: 'smooth' });
+      elements.sendQuoteBtn.style.animation = 'pulse 1s infinite';
+      setTimeout(() => elements.sendQuoteBtn.style.animation = '', 3000);
+    }
+
+    function sendQuote() {
+      const mainName = elements.mainName.value.trim();
+      const mainAge = ageLastBirthday(elements.mainDOB.value);
+      const mainCover = parseInt(elements.mainCover.value);
+
+      if (!mainName || !mainAge) {
+        alert('Please enter main member name and date of birth');
+        return;
+      }
+
+      let message = `*AVBOB Insurance Quote Request*\n\n`;
+      message += `*Main Member Details:*\n`;
+      message += `Name: ${mainName}\n`;
+      message += `Age: ${mainAge} years\n`;
+      message += `Date of Birth: ${elements.mainDOB.value}\n`;
+      message += `Cover Amount: R${mainCover.toLocaleString()}\n\n`;
+
+      // Add spouse details
+      if (elements.includeSpouse.checked) {
+        const spouseName = elements.spouseName.value.trim();
+        const spouseAge = ageLastBirthday(elements.spouseDOB.value);
+        const spouseCover = parseInt(elements.spouseCover.value);
+        
+        message += `*Spouse Details:*\n`;
+        message += `Name: ${spouseName || 'Not provided'}\n`;
+        message += `Age: ${spouseAge || 'Not provided'} years\n`;
+        message += `Date of Birth: ${elements.spouseDOB.value || 'Not provided'}\n`;
+        message += `Cover Amount: R${spouseCover.toLocaleString()}\n\n`;
+      }
+
+      // Add children details
+      if (elements.includeChildren.checked) {
+        const childrenCount = elements.childrenCount.value;
+        const childrenCover = parseInt(elements.childrenCover.value);
+        const childrenAges = elements.childrenAges.value;
+        
+        message += `*Children Coverage:*\n`;
+        message += `Number of Children: ${childrenCount}\n`;
+        message += `Ages: ${childrenAges || 'Not specified'}\n`;
+        message += `Cover Amount per Child: R${childrenCover.toLocaleString()}\n\n`;
+      }
+
+      // Add extended family details
+      if (elements.includeExtended.checked) {
+        const extendedCount = elements.extendedCount.value;
+        const extendedCover = parseInt(elements.extendedCover.value);
+        
+        message += `*Extended Family Coverage:*\n`;
+        message += `Number of Members: ${extendedCount}\n`;
+        message += `Cover Amount per Member: R${extendedCover.toLocaleString()}\n\n`;
+      }
+
+      // Add selected product info
+      if (window.selectedProduct) {
+        message += `*Selected Product:*\n`;
+        message += `${window.selectedProduct.productName} (${window.selectedProduct.tableCode})\n`;
+        message += `Self-paying premium: R${window.selectedProduct.selfPay}/month\n`;
+        message += `Third-party premium: R${window.selectedProduct.thirdParty}/month\n\n`;
+      }
+
+      // Add benefits and requirements
+      message += `*Product Benefits:*\n`;
+      message += `• Comprehensive funeral cover\n`;
+      message += `• Accident benefit (where applicable)\n`;
+      message += `• Premium holiday on retrenchment\n`;
+      message += `• Free funeral benefits with AVBOB\n`;
+      message += `• Member discounts and rewards\n`;
+      message += `• Option to continue cover for family\n\n`;
+
+      message += `*Required Documents:*\n`;
+      message += `• ID copies of all insured persons\n`;
+      message += `• Bank statement (not older than 3 months)\n`;
+      message += `• Salary advice (for stop order)\n`;
+      message += `• Marriage certificate (if spouse included)\n`;
+      message += `• Birth certificates (for children)\n\n`;
+
+      message += `*Important Information:*\n`;
+      message += `• 6-month waiting period for natural death\n`;
+      message += `• No waiting period for accidental death\n`;
+      message += `• Policy fee of R10 included in premiums\n`;
+      message += `• Multiple payment methods available\n\n`;
+
+      message += `Please confirm if you'd like to proceed with this application.`;
+
+      // Send to WhatsApp
+      const whatsappMessage = encodeURIComponent(message);
+      const whatsappURL = `https://wa.me/27698441434?text=${whatsappMessage}`;
+      window.open(whatsappURL, '_blank');
+    }
+
+    // Initialize
+    function init() {
+      setupEventListeners();
+      calculatePremiums();
+      
+      // Set initial display values
+      elements.mainCoverDisplay.textContent = 'R20,000';
+      elements.spouseCoverDisplay.textContent = 'R10,000';
+      elements.childrenCoverDisplay.textContent = 'R10,000';
+      elements.extendedCoverDisplay.textContent = 'R5,000';
+    }
+
+    // Start the application
+    init();
   </script>
 </body>
 </html>
