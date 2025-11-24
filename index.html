@@ -267,7 +267,35 @@
       if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
       return age;
     }
-
+    // This function creates individual rows with name + DOB for each member
+    function createMemberRow(placeholder, type) {
+      const div = document.createElement('div');
+      div.className = 'p-3 bg-slate-50 rounded-lg border';
+      
+      const name = document.createElement('input');
+      name.type = 'text';
+      name.placeholder = placeholder || 'Full name';
+      name.className = 'w-full p-2 rounded-lg border mb-2';
+      
+      const dob = document.createElement('input');
+      dob.type = 'date';
+      dob.className = 'w-full p-2 rounded-lg border mb-2';
+      dob.onchange = calculateAllOptions; // ← Recalculates when DOB changes
+      
+      const remove = document.createElement('button');
+      remove.className = 'text-red-600 text-sm hover:text-red-800 font-medium';
+      remove.textContent = '× Remove';
+      remove.onclick = function() { 
+        div.remove(); 
+        hideCoverDivIfEmpty(type);
+        calculateAllOptions(); 
+      };
+      
+      div.appendChild(name);
+      div.appendChild(dob);
+      div.appendChild(remove);
+      return div;
+    }
     function getAgeBand(age) {
       if (age >= 18 && age <= 24) return '18-24';
       if (age >= 25 && age <= 39) return '25-39';
