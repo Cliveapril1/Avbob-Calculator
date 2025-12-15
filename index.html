@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AVBOB Premium Calculator — Fixed</title>
+  <title>AVBOB Premium Calculator</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -44,8 +44,27 @@
 
         <div id="coverDiv">
           <label class="block text-sm font-medium mb-2">Cover Amount</label>
-          <input type="range" id="mainCover" min="10000" max="50000" step="5000" value="20000" class="w-full" oninput="updateCoverLabel();calculateQuote()" />
-          <p class="text-center font-semibold text-green-700" id="mainCoverLabel">R20,000</p>
+          
+          <!-- Cashback: Slider 10k–50k -->
+          <div id="cashbackCoverControls">
+            <input type="range" id="mainCover" min="10000" max="50000" step="5000" value="20000" class="w-full" oninput="updateCoverLabel();calculateQuote()" />
+            <p class="text-center font-semibold text-green-700" id="mainCoverLabel">R20,000</p>
+          </div>
+
+          <!-- Repatriation: 3 buttons only -->
+          <div id="repatriationCoverControls" class="hidden space-y-3">
+            <button type="button" onclick="setRepatriationCover(10000)" class="w-full p-4 rounded-lg border-2 border-gray-300 hover:border-green-600 transition ${document.getElementById('mainCoverHidden')?.value == 10000 ? 'bg-green-600 text-white border-green-600' : 'bg-white'}">
+              R10,000 Cover
+            </button>
+            <button type="button" onclick="setRepatriationCover(20000)" class="w-full p-4 rounded-lg border-2 border-gray-300 hover:border-green-600 transition ${document.getElementById('mainCoverHidden')?.value == 20000 ? 'bg-green-600 text-white border-green-600' : 'bg-white'}">
+              R20,000 Cover
+            </button>
+            <button type="button" onclick="setRepatriationCover(30000)" class="w-full p-4 rounded-lg border-2 border-gray-300 hover:border-green-600 transition ${document.getElementById('mainCoverHidden')?.value == 30000 ? 'bg-green-600 text-white border-green-600' : 'bg-white'}">
+              R30,000 Cover
+            </button>
+            <input type="hidden" id="mainCoverHidden" value="20000">
+            <p class="text-center font-semibold text-green-700" id="mainCoverLabelRepat">R20,000</p>
+          </div>
         </div>
 
         <div id="pensionerOptions" class="hidden mt-3">
@@ -115,7 +134,43 @@
     </main>
   </div>
 
+<!-- Fixed Bottom Bar -->
+<div id="fixedBottomBar" 
+     class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-between items-center z-50">
+
+  <button id="viewPremiumBtn" 
+          onclick="scrollToPremium()"
+          class="flex-1 bg-green-600 text-white py-3 mr-2 rounded-xl font-semibold text-center">
+    View Premium
+  </button>
+
+  <button id="whatsappFixedBtn"
+          class="flex-1 bg-green-700 text-white py-3 ml-2 rounded-xl font-semibold text-center">
+    WhatsApp Me
+  </button>
+
+</div>
+
   <script>
+        function setRepatriationCover(amount) {
+      document.getElementById('mainCoverHidden').value = amount;
+      document.getElementById('mainCoverLabelRepat').textContent = 'R' + amount.toLocaleString();
+      calculateQuote();
+      updateRepatriationButtons();
+    }
+
+    function updateRepatriationButtons() {
+      const value = Number(document.getElementById('mainCoverHidden').value);
+      document.querySelectorAll('#repatriationCoverControls button').forEach(btn => {
+        if (parseInt(btn.textContent.match(/\d+/)[0]) * 1000 === value) {
+          btn.classList.remove('bg-white', 'border-gray-300');
+          btn.classList.add('bg-green-600', 'text-white', 'border-green-600');
+        } else {
+          btn.classList.remove('bg-green-600', 'text-white', 'border-green-600');
+          btn.classList.add('bg-white', 'border-gray-300');
+        }
+      });
+    }
     // Premium rate tables from the manuals (kept same as your source)
     const premiumRates = {
       cashback: {
@@ -233,7 +288,7 @@
         single: 10000
       }
     };
-
+    
     /* -------------------- Date helpers & age functions -------------------- */
     function safeDate(dobStr) {
       if (!dobStr) return null;
@@ -309,20 +364,66 @@
         mainSection.classList.remove('hidden');
 
         if (product === 'pensioner') {
+          // Pensioner: hide additional members and payer type
           pensionerOptions.classList.remove('hidden');
           payerTypeDiv.classList.add('hidden');
           additionalSection.classList.add('hidden');
         } else {
+          // Cashback or Repatriation
           pensionerOptions.classList.add('hidden');
           payerTypeDiv.classList.remove('hidden');
           additionalSection.classList.remove('hidden');
 
+          // === YOUR REQUESTED UPDATE ===
           if (product === 'repatriation') {
+            const cashbackControls = document.getElementById('cashbackCoverControls');
+            const repatriationControls = document.getElementById('repatriationCoverControls');
+
+            // Reuse the existing main slider for repatriation: move it into repatriation container
+            const mainCover = document.getElementById('mainCover');
+            const mainCoverLabel = document.getElementById('mainCoverLabel');
+            // Clear repatriation container and append slider + label there
+            if (repatriationControls && mainCover && mainCoverLabel) {
+              repatriationControls.innerHTML = '';
+              mainCover.min = 10000;
+              mainCover.max = 30000;
+              mainCover.step = 10000;
+              mainCover.value = 20000;
+              mainCover.oninput = function() { updateCoverLabel(); calculateQuote(); };
+              repatriationControls.appendChild(mainCover);
+              repatriationControls.appendChild(mainCoverLabel);
+              mainCoverLabel.textContent = 'R' + Number(mainCover.value).toLocaleString();
+            }
+
+            cashbackControls.classList.add('hidden');
+            repatriationControls.classList.remove('hidden');
+
+            // Repatriation children benefit options
             childrenDiv.querySelector('select').innerHTML = `
               <option value="0">No Children Benefit</option>
               <option value="KV8">KV8 - Repatriation</option>
             `;
           } else {
+            // Cashback: ensure the main slider is back in the cashback container with full range
+            const cashbackControls = document.getElementById('cashbackCoverControls');
+            const repatriationControls = document.getElementById('repatriationCoverControls');
+            const mainCover = document.getElementById('mainCover');
+            const mainCoverLabel = document.getElementById('mainCoverLabel');
+            if (cashbackControls && mainCover && mainCoverLabel) {
+              cashbackControls.innerHTML = '';
+              mainCover.min = 10000;
+              mainCover.max = 50000;
+              mainCover.step = 5000;
+              mainCover.value = 20000;
+              mainCover.oninput = function() { updateCoverLabel(); calculateQuote(); };
+              cashbackControls.appendChild(mainCover);
+              cashbackControls.appendChild(mainCoverLabel);
+              mainCoverLabel.textContent = 'R' + Number(mainCover.value).toLocaleString();
+            }
+            cashbackControls.classList.remove('hidden');
+            repatriationControls.classList.add('hidden');
+
+            // Cashback children benefit options
             childrenDiv.querySelector('select').innerHTML = `
               <option value="0">No Children Benefit</option>
               <option value="KV5">KV5 (R10k max)</option>
@@ -330,12 +431,16 @@
               <option value="KV7">KV7 (R30k max)</option>
             `;
           }
+          // === END OF YOUR REQUESTED UPDATE ===
         }
       } else {
+        // No product selected
         mainSection.classList.add('hidden');
         additionalSection.classList.add('hidden');
       }
-      calculateQuote();
+
+      updateCoverLabel();
+      calculateQuote(); // Refresh quote when switching products
     }
 
     function updateCoverLabel() {
@@ -373,7 +478,10 @@
         document.getElementById('results').classList.add('hidden');
         return;
       }
-
+      function getRepatriationTier(cover) {
+        const map = { 10000: 0, 20000: 1, 30000: 2 };
+        return map[cover] ?? null;
+      }
       const mainName = document.getElementById('mainName').value || 'Main Member';
       const mainDOB = document.getElementById('mainDOB').value;
       const mainAge = calculateAge(mainDOB);
@@ -639,6 +747,9 @@
         `;
         resultsContainer.appendChild(totalCard);
 
+        // Update fixed bottom bar with live total
+        updateStickyTotal(totalPremium);
+
         // WhatsApp message
         let waMessage = `AVBOB Quote Request%0A%0A`;
         const product = document.getElementById('productType').value;
@@ -655,6 +766,8 @@
 
         document.getElementById('results').classList.remove('hidden');
       } else {
+        // clear sticky total when no quote
+        updateStickyTotal(null);
         document.getElementById('results').classList.add('hidden');
       }
     }
@@ -665,6 +778,37 @@
     window.calculateQuote = calculateQuote;
     window.updateProductFields = updateProductFields;
     window.addMember = addMember;
+    
+    // Scroll to results helper used by fixed bottom bar
+    function scrollToPremium() {
+      const results = document.getElementById('results');
+      if (!results.classList.contains('hidden')) {
+        results.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Please complete member details to view premiums.');
+      }
+    }
+
+    // Wire bottom-bar WhatsApp button to the existing WhatsApp generator
+    const whatsappFixed = document.getElementById('whatsappFixedBtn');
+    if (whatsappFixed) {
+      whatsappFixed.onclick = function() {
+        const inner = document.getElementById('whatsappBtn');
+        if (inner) inner.click();
+        else alert('Please generate a quote first.');
+      };
+    }
+
+    // Update the fixed bottom bar button with the live total premium
+    function updateStickyTotal(amount) {
+      const btn = document.getElementById('viewPremiumBtn');
+      if (!btn) return;
+      if (typeof amount === 'number' && !isNaN(amount) && amount > 0) {
+        btn.textContent = `View Premium • R${amount.toLocaleString()}`;
+      } else {
+        btn.textContent = 'View Premium';
+      }
+    }
   </script>
 </body>
 </html>
