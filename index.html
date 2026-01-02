@@ -37,8 +37,8 @@
         <div id="payerTypeDiv" class="mb-3">
           <label class="block text-sm font-medium mb-2">Who will pay premiums?</label>
           <select id="payerType" class="w-full p-3 rounded-lg border" onchange="calculateQuote()">
-            <option value="self">Self (J18/R11)</option>
-            <option value="third">Third Party (J19/R12)</option>
+            <option value="self">You yourself are paying (J18/R11)</option>
+            <option value="third">Your paying for someone/Third Party (J19/R12)</option>
           </select>
         </div>
 
@@ -529,11 +529,36 @@
           return;
         }
 
-        const coverIndex = getCoverIndex(mainCover);
-        if (coverIndex >= 0) {
-          const rateTable = product === 'cashback' ? premiumRates.cashback[tableCode] : premiumRates.repatriation[tableCode];
-          if (rateTable && rateTable[ageBand] && typeof rateTable[ageBand][coverIndex] !== 'undefined') {
-            const premium = rateTable[ageBand][coverIndex];
+        if (product === 'cashback') {
+          const coverIndex = getCoverIndex(mainCover);
+          if (coverIndex >= 0) {
+            const rateTable = premiumRates.cashback[tableCode];
+            if (rateTable && rateTable[ageBand] && typeof rateTable[ageBand][coverIndex] !== 'undefined') {
+              const premium = rateTable[ageBand][coverIndex];
+              totalPremium += premium;
+              quoteDetails.push({
+                name: mainName,
+                type: 'Main Member (' + tableCode + ')',
+                age: mainAge,
+                cover: mainCover,
+                premium: premium,
+                frequency: 'monthly'
+              });
+            } else {
+              console.warn('Rate not found for main member:', product, tableCode, ageBand, coverIndex);
+              document.getElementById('results').classList.add('hidden');
+              return;
+            }
+          } else {
+            document.getElementById('results').classList.add('hidden');
+            return;
+          }
+        } else {
+          // Repatriation uses tiers (10000/20000/30000)
+          const tier = getRepatriationTier(mainCover);
+          const rateTable = premiumRates.repatriation[tableCode];
+          if (tier !== null && rateTable && rateTable[ageBand] && typeof rateTable[ageBand][tier] !== 'undefined') {
+            const premium = rateTable[ageBand][tier];
             totalPremium += premium;
             quoteDetails.push({
               name: mainName,
@@ -544,15 +569,10 @@
               frequency: 'monthly'
             });
           } else {
-            // missing rate lookup => hide and exit
-            console.warn('Rate not found for main member:', product, tableCode, ageBand, coverIndex);
+            console.warn('Rate not found for main member (repatriation):', tableCode, ageBand, tier);
             document.getElementById('results').classList.add('hidden');
             return;
           }
-        } else {
-          // invalid cover value
-          document.getElementById('results').classList.add('hidden');
-          return;
         }
 
         // --- Spouse --- //
@@ -651,19 +671,35 @@
             else if (parentAge >=70 && parentAge <=74) parentAgeBand = '70-74';
             else if (parentAge >=75 && parentAge <=79) parentAgeBand = '75-79';
 
-            const parentCoverIndex = getCoverIndex(parentCover);
             const parentRateTable = product === 'cashback' ? premiumRates.cashback.parent : premiumRates.repatriation.parent;
-            if (parentAgeBand && parentCoverIndex >= 0 && parentRateTable && parentRateTable[parentAgeBand] && typeof parentRateTable[parentAgeBand][parentCoverIndex] !== 'undefined') {
-              const premium = parentRateTable[parentAgeBand][parentCoverIndex];
-              totalPremium += premium;
-              quoteDetails.push({
-                name: parentName,
-                type: 'Parent (OV' + (product === 'cashback' ? '6' : '8') + ')',
-                age: parentAge,
-                cover: parentCover,
-                premium: premium,
-                frequency: 'monthly'
-              });
+            if (product === 'cashback') {
+              const parentCoverIndex = getCoverIndex(parentCover);
+              if (parentAgeBand && parentCoverIndex >= 0 && parentRateTable && parentRateTable[parentAgeBand] && typeof parentRateTable[parentAgeBand][parentCoverIndex] !== 'undefined') {
+                const premium = parentRateTable[parentAgeBand][parentCoverIndex];
+                totalPremium += premium;
+                quoteDetails.push({
+                  name: parentName,
+                  type: 'Parent (OV' + (product === 'cashback' ? '6' : '8') + ')',
+                  age: parentAge,
+                  cover: parentCover,
+                  premium: premium,
+                  frequency: 'monthly'
+                });
+              }
+            } else {
+              const tier = getRepatriationTier(parentCover);
+              if (parentAgeBand && tier !== null && parentRateTable && parentRateTable[parentAgeBand] && typeof parentRateTable[parentAgeBand][tier] !== 'undefined') {
+                const premium = parentRateTable[parentAgeBand][tier];
+                totalPremium += premium;
+                quoteDetails.push({
+                  name: parentName,
+                  type: 'Parent (OV' + (product === 'cashback' ? '6' : '8') + ')',
+                  age: parentAge,
+                  cover: parentCover,
+                  premium: premium,
+                  frequency: 'monthly'
+                });
+              }
             }
           });
         }
@@ -689,19 +725,35 @@
             else if (extAge >=65 && extAge <=69) extAgeBand = '65-69';
             else if (extAge >=70 && extAge <=74) extAgeBand = '70-74';
 
-            const extCoverIndex = getCoverIndex(extendedCover);
             const extRateTable = product === 'cashback' ? premiumRates.cashback.extended : premiumRates.repatriation.extended;
-            if (extAgeBand && extCoverIndex >= 0 && extRateTable && extRateTable[extAgeBand] && typeof extRateTable[extAgeBand][extCoverIndex] !== 'undefined') {
-              const premium = extRateTable[extAgeBand][extCoverIndex];
-              totalPremium += premium;
-              quoteDetails.push({
-                name: extName,
-                type: 'Extended (EX' + (product === 'cashback' ? '6' : '8') + ')',
-                age: extAge,
-                cover: extendedCover,
-                premium: premium,
-                frequency: 'monthly'
-              });
+            if (product === 'cashback') {
+              const extCoverIndex = getCoverIndex(extendedCover);
+              if (extAgeBand && extCoverIndex >= 0 && extRateTable && extRateTable[extAgeBand] && typeof extRateTable[extAgeBand][extCoverIndex] !== 'undefined') {
+                const premium = extRateTable[extAgeBand][extCoverIndex];
+                totalPremium += premium;
+                quoteDetails.push({
+                  name: extName,
+                  type: 'Extended (EX' + (product === 'cashback' ? '6' : '8') + ')',
+                  age: extAge,
+                  cover: extendedCover,
+                  premium: premium,
+                  frequency: 'monthly'
+                });
+              }
+            } else {
+              const tier = getRepatriationTier(extendedCover);
+              if (extAgeBand && tier !== null && extRateTable && extRateTable[extAgeBand] && typeof extRateTable[extAgeBand][tier] !== 'undefined') {
+                const premium = extRateTable[extAgeBand][tier];
+                totalPremium += premium;
+                quoteDetails.push({
+                  name: extName,
+                  type: 'Extended (EX' + (product === 'cashback' ? '6' : '8') + ')',
+                  age: extAge,
+                  cover: extendedCover,
+                  premium: premium,
+                  frequency: 'monthly'
+                });
+              }
             }
           });
         }
