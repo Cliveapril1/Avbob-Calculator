@@ -7,23 +7,23 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
-  <div id="app" class="max-w-2xl mx-auto p-4">
+  <div id="app" class="max-w-2xl mx-auto p-4 pt-16">
     <header class="flex items-center gap-3 mb-6 bg-white p-4 rounded-2xl shadow-md">
       <div class="w-14 h-14 rounded-lg bg-green-700 flex items-center justify-center text-white text-2xl font-bold">A</div>
       <div>
-        <h1 class="text-xl font-bold text-gray-800">AVBOB Premium Calculator</h1>
-        <p class="text-sm text-slate-600">Calculate your funeral/Cash cover premium instantly</p>
+        <h1 class="text-xl font-bold text-gray-800">Clive's Premium Calculator</h1>
+        <p class="text-sm text-slate-600">Contact Clive to help calculate your funeral/Cash cover premium instantly 0678441434</p>
       </div>
     </header>
 
     <main class="space-y-4">
       <!-- Product Selection -->
       <section class="bg-white p-5 rounded-2xl shadow-md">
-        <h2 class="font-semibold text-lg mb-3">Select Product</h2>
+        <h2 class="font-semibold text-lg mb-3">Select the kind of policy Product(whatsapp me if you want help)</h2>
         <select id="productType" class="w-full p-3 rounded-lg border-2 border-gray-200 focus:border-green-600" onchange="updateProductFields()">
-          <option value="">Choose a product...</option>
+          <option value="">Choose a product with or without Cashback ...</option>
           <option value="cashback">Cashback Funeral Cover</option>
-          <option value="repatriation">Repatriation Policy</option>
+          <option value="repatriation">Cash Policy (Repatriation)</option>
           <option value="pensioner">Pensioner Funeral Plan (Older Than 64)</option>
         </select>
       </section>
@@ -134,9 +134,9 @@
     </main>
   </div>
 
-<!-- Fixed Bottom Bar -->
+<!-- Fixed Top Bar -->
 <div id="fixedBottomBar" 
-     class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-between items-center z-50">
+     class="fixed top-0 left-0 right-0 bg-white border-b shadow-lg p-3 flex justify-between items-center z-50">
 
   <button id="viewPremiumBtn" 
           onclick="scrollToPremium()"
@@ -753,7 +753,7 @@
         // WhatsApp message
         let waMessage = `AVBOB Quote Request%0A%0A`;
         const product = document.getElementById('productType').value;
-        waMessage += `Product: ${product === 'cashback' ? 'Cashback Funeral Cover' : (product === 'repatriation' ? 'Repatriation Policy' : 'Pensioner Funeral Plan')}%0A`;
+        waMessage += `Product: ${product === 'cashback' ? 'Cashback Funeral Cover' : (product === 'repatriation' ? 'Cash Policy (Repatriation)' : 'Pensioner Funeral Plan')}%0A`;
         waMessage += `Total Premium: R${totalPremium}%0A%0AMembers:%0A`;
         quoteDetails.forEach(detail => {
           waMessage += `• ${detail.name} (${detail.type})%0A  Cover: ${detail.cover ? 'R' + detail.cover : '-'}, Premium: R${detail.premium}%0A`;
@@ -779,11 +779,14 @@
     window.updateProductFields = updateProductFields;
     window.addMember = addMember;
     
-    // Scroll to results helper used by fixed bottom bar
+    // Scroll to results helper used by fixed top bar
     function scrollToPremium() {
       const results = document.getElementById('results');
+      const bar = document.getElementById('fixedBottomBar');
       if (!results.classList.contains('hidden')) {
-        results.scrollIntoView({ behavior: 'smooth' });
+        const barHeight = bar ? bar.offsetHeight : 0;
+        const top = results.getBoundingClientRect().top + window.pageYOffset - barHeight - 12;
+        window.scrollTo({ top, behavior: 'smooth' });
       } else {
         alert('Please complete member details to view premiums.');
       }
