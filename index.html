@@ -22,9 +22,9 @@
         <h2 class="font-semibold text-lg mb-3">Select the kind of policy Product(whatsapp me if you want help)</h2>
         <select id="productType" class="w-full p-3 rounded-lg border-2 border-gray-200 focus:border-green-600" onchange="updateProductFields()">
           <option value="">Choose a product with or without Cashback ...</option>
-          <option value="cashback">Cashback Funeral Cover</option>
-          <option value="repatriation">Cash Policy (Repatriation)</option>
-          <option value="pensioner">Pensioner Funeral Plan (Older Than 64)</option>
+          <option value="cashback" selected>Avbob Cashback Funeral Cover</option>
+          <option value="repatriation">Avbob Cash Policy (Repatriation)</option>
+          <option value="pensioner">Avbob Pensioner Funeral Plan (Older Than 55)</option>
         </select>
       </section>
 
@@ -32,6 +32,7 @@
       <section id="mainSection" class="bg-white p-5 rounded-2xl shadow-md hidden">
         <h2 class="font-semibold text-lg mb-3">Main Member Details</h2>
         <input id="mainName" class="w-full p-3 rounded-lg border mb-3" placeholder="Full name" />
+        <h2 class="font-semibold text-lg mb-3">Date of Birth</h2>
         <input id="mainDOB" type="date" class="w-full p-3 rounded-lg border mb-3" onchange="calculateQuote()" />
 
         <div id="payerTypeDiv" class="mb-3">
@@ -146,7 +147,7 @@
 
   <button id="whatsappFixedBtn"
           class="flex-1 bg-green-700 text-white py-3 ml-2 rounded-xl font-semibold text-center">
-    WhatsApp Me
+    WhatsApp me if this is confusing
   </button>
 
 </div>
@@ -538,6 +539,7 @@
               totalPremium += premium;
               quoteDetails.push({
                 name: mainName,
+                dob: mainDOB,
                 type: 'Main Member (' + tableCode + ')',
                 age: mainAge,
                 cover: mainCover,
@@ -608,6 +610,7 @@
             totalPremium += premium;
             quoteDetails.push({
               name: spouseName,
+              dob: spouseDOB,
               type: 'Spouse (' + (product === 'cashback' ? 'CO1' : 'CO2') + ')',
               age: spouseAge,
               cover: spouseCover,
@@ -679,6 +682,7 @@
                 totalPremium += premium;
                 quoteDetails.push({
                   name: parentName,
+                  dob: parentDOB,
                   type: 'Parent (OV' + (product === 'cashback' ? '6' : '8') + ')',
                   age: parentAge,
                   cover: parentCover,
@@ -693,6 +697,7 @@
                 totalPremium += premium;
                 quoteDetails.push({
                   name: parentName,
+                  dob: parentDOB,
                   type: 'Parent (OV' + (product === 'cashback' ? '6' : '8') + ')',
                   age: parentAge,
                   cover: parentCover,
@@ -733,6 +738,7 @@
                 totalPremium += premium;
                 quoteDetails.push({
                   name: extName,
+                  dob: extDOB,
                   type: 'Extended (EX' + (product === 'cashback' ? '6' : '8') + ')',
                   age: extAge,
                   cover: extendedCover,
@@ -747,6 +753,7 @@
                 totalPremium += premium;
                 quoteDetails.push({
                   name: extName,
+                  dob: extDOB,
                   type: 'Extended (EX' + (product === 'cashback' ? '6' : '8') + ')',
                   age: extAge,
                   cover: extendedCover,
@@ -802,17 +809,25 @@
         // Update fixed bottom bar with live total
         updateStickyTotal(totalPremium);
 
-        // WhatsApp message
-        let waMessage = `AVBOB Quote Request%0A%0A`;
+        // WhatsApp message (formatted and URL-encoded)
+        function fmtMoney(v) { return Number.isInteger(v) ? v.toString() : v.toFixed(1); }
         const product = document.getElementById('productType').value;
-        waMessage += `Product: ${product === 'cashback' ? 'Cashback Funeral Cover' : (product === 'repatriation' ? 'Cash Policy (Repatriation)' : 'Pensioner Funeral Plan')}%0A`;
-        waMessage += `Total Premium: R${totalPremium}%0A%0AMembers:%0A`;
+        const productName = product === 'cashback' ? 'Cashback Funeral Cover' : (product === 'repatriation' ? 'Cash Policy (Repatriation)' : 'Pensioner Funeral Plan');
+
+        let waText = `AVBOB Quote Request\n\n`;
+        waText += `Product: ${productName}\n`;
+        waText += `Total Premium: R${fmtMoney(totalPremium)}\n\nMembers:\n`;
+
         quoteDetails.forEach(detail => {
-          waMessage += `• ${detail.name} (${detail.type})%0A  Cover: ${detail.cover ? 'R' + detail.cover : '-'}, Premium: R${detail.premium}%0A`;
+          const dobPart = detail.dob ? ` (${detail.dob})` : '';
+          const coverText = detail.cover ? 'R' + detail.cover.toLocaleString() : '-';
+          waText += `* ${detail.name}${dobPart} (${detail.type})\n  Cover: ${coverText}, Premium: R${fmtMoney(detail.premium)}\n`;
         });
-        waMessage += `%0APlease contact me to complete the application.%0A%0ADocuments needed:%0A• ID copies of all members%0A• Bank details for debit order%0A• Proof of income/salary slip`;
+
+        waText += `\nThank-you for contacting me, to complete the application the following.\n\nDocuments needed:\n* ID copies of Main members\n* Bank details for debit order, payslip for persal`;
 
         document.getElementById('whatsappBtn').onclick = function() {
+          const waMessage = encodeURIComponent(waText);
           window.open(`https://wa.me/27678441434?text=${waMessage}`, '_blank');
         };
 
@@ -826,6 +841,9 @@
 
     // Initial UI setup
     updateCoverLabel();
+    // Show default product fields (default set to Cashback)
+    updateProductFields();
+    calculateQuote();
     // expose calculateQuote to input handlers (already used inline)
     window.calculateQuote = calculateQuote;
     window.updateProductFields = updateProductFields;
